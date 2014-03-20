@@ -21,32 +21,21 @@ function getContents($sPath, $aVars = [])
     return $sString;
 }
 
-function parseHtml($sHtml, $aVars)
+function parseHtml($sHtml, $aVars = [])
 {
     $dom = new DOMDocument();
     $caller = new ErrorTrap([$dom, 'loadHTML']);
-
     $caller->call($sHtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    $nodes = getSateNodes($dom);
 
-    $finder = new DomXPath($dom);
-    $classname = "sate";
-    $nodes = $finder->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' $classname ')]");
     foreach ($nodes as $node) {
-        $src = $node->getAttribute('src');
-        $sContent = getContents($src);
 
-        $childDoc = NULL;
-        try
-        {
-            $childDoc = new DOMDocument();
-            $caller = new ErrorTrap([$childDoc, 'loadHTML']);
+        $src = getSource($node, $aVars);
+        $sContent = getContents($src, $aVars);
 
-            $caller->call('<div></div>'.$sContent, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-        }
-        catch(\Exception $e)
-        {
-            echo $e;
-        }
+        $childDoc = new DOMDocument();
+        $caller = new ErrorTrap([$childDoc, 'loadHTML']);
+        $caller->call('<div></div>'.$sContent, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 
         foreach($childDoc->documentElement->childNodes as $tempNode)
         {
@@ -56,6 +45,24 @@ function parseHtml($sHtml, $aVars)
         $node->parentNode->removeChild($node);
     }
     return $dom->saveHTML();
+}
+
+function getSateNodes(&$dom)
+{
+    $finder = new DomXPath($dom);
+    $classname = "sate";
+    return $finder->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' $classname ')]");
+}
+
+function getSource(&$node, &$aVars)
+{
+    $src = $node->getAttribute('src');
+    $srcVar = preg_replace('(^%|%$)', '', $src);
+    if(isset($aVars[$srcVar]))
+    {
+        $src = $aVars[$srcVar];
+    }
+    return $src;
 }
 
 class ErrorTrap {
