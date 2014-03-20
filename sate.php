@@ -1,11 +1,11 @@
 <?php
 
-function echoTemplate($sPath)
+function echoTemplate($sPath, $aVars = [])
 {
-    echo getContents($sPath);
+    echo getContents($sPath, $aVars);
 }
 
-function getContents($sPath)
+function getContents($sPath, $aVars = [])
 {
     $sTmpString = file_get_contents($sPath);
 
@@ -14,19 +14,15 @@ function getContents($sPath)
     switch(strtolower($ext))
     {
         case 'html':
-            $sString = parseHtml($sTmpString);
+            $sString = parseHtml($sTmpString, $aVars);
             break;
     }
 
     return $sString;
 }
 
-function parseHtml($sHtml)
+function parseHtml($sHtml, $aVars)
 {
-    static $bRoot = true;
-    $bRootloc = $bRoot;
-    $bRoot = false;
-
     $dom = new DOMDocument();
     $caller = new ErrorTrap([$dom, 'loadHTML']);
 
