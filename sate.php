@@ -30,14 +30,7 @@ function parseHtml($sHtml)
     $dom = new DOMDocument();
     $caller = new ErrorTrap([$dom, 'loadHTML']);
 
-    if($bRootloc)
-    {
-        $caller->call($sHtml);
-    }
-    else
-    {
-        $caller->call($sHtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-    }
+    $caller->call($sHtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 
     $finder = new DomXPath($dom);
     $classname = "sate";
@@ -52,20 +45,17 @@ function parseHtml($sHtml)
             $childDoc = new DOMDocument();
             $caller = new ErrorTrap([$childDoc, 'loadHTML']);
 
-            $sContent = "<div id='__sate_internal__'>$sContent</div>";
-            $caller->call($sContent, LIBXML_HTML_NODEFDTD);
+            $caller->call('<div></div>'.$sContent, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         }
         catch(\Exception $e)
         {
             echo $e;
         }
 
-        $nodesContent = $childDoc->getElementById('__sate_internal__');
-        $ins = $node->parentNode;
-        foreach($nodesContent->childNodes as $nodeContent)
+        foreach($childDoc->documentElement->childNodes as $tempNode)
         {
-            $importNode = $dom->importNode($nodeContent, true);
-            $ins->insertBefore($importNode, $node);
+            $impNode = $dom->importNode($tempNode, true);
+            $node->parentNode->insertBefore($impNode, $node);
         }
         $node->parentNode->removeChild($node);
     }
