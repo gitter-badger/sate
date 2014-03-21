@@ -32,6 +32,13 @@ function parseHtml($sHtml, $aVars = [])
 
         $src = getSource($node, $aVars);
         $sContent = getContents($src, $aVars);
+        $iLoop = getLoop($node);
+
+        $sTmp = $sContent;
+        for($i = 0; $i < $iLoop; $i++)
+        {
+            $sContent .= $sTmp;
+        }
 
         $childDoc = new DOMDocument();
         $caller = new ErrorTrap([$childDoc, 'loadHTML']);
@@ -45,6 +52,16 @@ function parseHtml($sHtml, $aVars = [])
         $node->parentNode->removeChild($node);
     }
     return $dom->saveHTML();
+}
+
+function getLoop(&$node)
+{
+    $iLoop = $node->getAttribute('loop');
+    if(is_numeric($iLoop))
+    {
+        return $iLoop;
+    }
+    return 0;
 }
 
 function getSateNodes(&$dom)
