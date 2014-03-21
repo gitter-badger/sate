@@ -1,5 +1,7 @@
 <?php
 
+namespace sate;
+
 function echoTemplate($sPath, $aVars = [])
 {
     echo getContents($sPath, $aVars);
@@ -23,7 +25,7 @@ function getContents($sPath, $aVars = [])
 
 function parseHtml($sHtml, $aVars = [])
 {
-    $dom = new DOMDocument();
+    $dom = new \DOMDocument();
     $caller = new ErrorTrap([$dom, 'loadHTML']);
     $caller->call($sHtml, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
     $nodes = getSateNodes($dom);
@@ -35,12 +37,12 @@ function parseHtml($sHtml, $aVars = [])
         $iLoop = getLoop($node);
 
         $sTmp = $sContent;
-        for($i = 0; $i < $iLoop; $i++)
+        for($i = 1; $i < $iLoop; $i++)
         {
             $sContent .= $sTmp;
         }
 
-        $childDoc = new DOMDocument();
+        $childDoc = new \DOMDocument();
         $caller = new ErrorTrap([$childDoc, 'loadHTML']);
         $caller->call('<div></div>'.$sContent, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
 
@@ -56,7 +58,7 @@ function parseHtml($sHtml, $aVars = [])
 
 function getLoop(&$node)
 {
-    $iLoop = $node->getAttribute('loop');
+    $iLoop = $node->getAttribute('repeat');
     if(is_numeric($iLoop))
     {
         return $iLoop;
@@ -66,7 +68,7 @@ function getLoop(&$node)
 
 function getSateNodes(&$dom)
 {
-    $finder = new DomXPath($dom);
+    $finder = new \DomXPath($dom);
     $classname = "sate";
     return $finder->query("//*[contains(concat(' ', normalize-space(@class), ' '), ' $classname ')]");
 }
