@@ -1,4 +1,4 @@
 sate
 ====
 
-badass micro tempting engine
+badass micro templating engine
