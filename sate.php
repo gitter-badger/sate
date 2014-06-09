@@ -16,7 +16,8 @@ function getContents($sPath, $aVars = [])
     switch(strtolower($ext))
     {
         case 'html':
-            $sString = parseHtml($sTmpString, $aVars);
+            $sHtml = parseHtml($sTmpString, $aVars);
+            $sString = preg_replace('/<sate.*<\/sate>/', '', $sHtml);
             break;
     }
 
@@ -49,7 +50,7 @@ function parseHtml($sHtml, $aVars = [])
         foreach($childDoc->documentElement->childNodes as $tempNode)
         {
             $impNode = $dom->importNode($tempNode, true);
-            $node->insertBefore($impNode, $node->firstChild);
+            $node->parentNode->insertBefore($impNode, $node);
         }
     }
     return $dom->saveHTML();
@@ -68,7 +69,7 @@ function getLoop(&$node)
 function getSateNodes(&$dom)
 {
     $tagName = "sate";
-    return $dom->getElementsByTagName('sate');
+    return $dom->getElementsByTagName($tagName);
 }
 
 function getSource(&$node, &$aVars)
